@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import random
+import sklearn.model_selection as ms
 from tqdm import tqdm
 
 def int64_feature(value):
@@ -35,9 +36,9 @@ txt_path = "./dataset/train.txt"  # 存放图像位置和对应label的txt文件
 data_lib = open(txt_path, "r").readlines()
 random.shuffle(data_lib)
 
-trainLib = data_lib[: int(len(data_lib) * 0.9)]
-testLib = data_lib[int(len(data_lib) * 0.9):]
-
+# trainLib = data_lib[: int(len(data_lib) * 0.9)]
+# testLib = data_lib[int(len(data_lib) * 0.9):]
+trainLib, testLib = ms.train_test_split(data_lib, test_size = 0.4)
 for line in tqdm(testLib):
     img_path = line.strip().split(" ")[0]
     label = int(line.strip().split(" ")[1])

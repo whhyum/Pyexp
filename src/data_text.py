@@ -57,6 +57,23 @@ def write_txt(content, filename, mode='w'):
             f.write(str_line)
 
 if __name__ == '__main__':
+    # # 少量数据集进行测试
+    # trainCat_dir = 'D:\\desktop\\Pyexp\\data\\train\\cat'
+    # trainCat_txt = 'D:\\desktop\\Pyexp\\src\\dataset\\test\\train.txt'
+    # trainCat_data = get_files_list(trainCat_dir, 0)
+    #
+    # trainDog_dir = 'D:\\desktop\\Pyexp\\data\\dataset\\train\\dog'
+    # trainDog_txt = 'D:\\desktop\\Pyexp\\src\\dataset\\train.txt'
+    # trainDog_data = get_files_list(trainDog_dir, 1)
+    # train_data = trainCat_data + trainDog_data
+    # write_txt(train_data, trainDog_txt, mode='w')
+    #
+    # test_dir = 'D:\\desktop\\Pyexp\\data\\dataset\\test1'
+    # test_txt = 'D:\\desktop\\Pyexp\\src\\dataset\\test.txt'
+    # test_data = get_files_list(test_dir, "")
+    # write_txt(test_data, test_txt, mode='w')
+
+    # 官网数据 => 12500
     trainCat_dir = 'D:\\desktop\\Pyexp\\data\\train\\cat'
     trainCat_txt = 'D:\\desktop\\Pyexp\\src\\dataset\\train.txt'
     trainCat_data = get_files_list(trainCat_dir, 0)
@@ -71,14 +88,3 @@ if __name__ == '__main__':
     test_txt = 'D:\\desktop\\Pyexp\\src\\dataset\\test.txt'
     test_data = get_files_list(test_dir, "")
     write_txt(test_data, test_txt, mode='w')
-
-
-    # val_dir = 'E:/111project/ship image/validation'
-    # val_txt = 'E:/111project/ship image/validation.txt'
-    # val_data = get_files_list(val_dir)
-    # write_txt(val_data, val_txt, mode='w')
-    #
-    # test_dir = 'E:/111project/ship image/test'
-    # test_txt = 'E:/111project/ship image/test.txt'
-    # test_data = get_files_list(test_dir)
-    # write_txt(test_data, test_txt, mode='w')

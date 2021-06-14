@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tqdm import tqdm
 learning_rate = 0.001
 training_step = 30000
 
@@ -44,6 +45,7 @@ model = tf.keras.Sequential([ResNet50, global_average_layer, fc])
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
               metrics=["accuracy"])
+
 print(model.summary())
 model.fit(train_dataset, epochs=5, validation_data=test_dataset,  shuffle=True, steps_per_epoch=1000, validation_steps=1)
 model.save("./resnet.h5")
