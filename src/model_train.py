@@ -2,13 +2,13 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
 learning_rate = 0.001
 training_step = 30000
 
 epochs = 10
-batch_size = 16
+batch_size = 8
 
 train_record_path = "./dataset/train.record"
 test_record_path = "./dataset/test.record"
@@ -16,8 +16,10 @@ test_record_path = "./dataset/test.record"
 train_dataset = tf.data.TFRecordDataset(train_record_path)
 test_dataset = tf.data.TFRecordDataset(test_record_path)
 
-steps_per_epoch = 25000/batch_size
-validation_steps = 12500/batch_size
+steps_per_epoch = 15
+    # 25000/batch_size
+validation_steps = 10
+    # 12500/batch_size
 
 
 # 定义一个解析函数
@@ -65,11 +67,17 @@ model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
 
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+              # loss= 'mean_squared_error',
               metrics=["accuracy"])
 
 print(model.summary())
-model_train = model.fit_generator(train_dataset, epochs = epochs, validation_data=test_dataset, shuffle=True, steps_per_epoch = 10, validation_steps=1)
-model.save("./resnet.h5")
+model_train = model.fit_generator(train_dataset, epochs = epochs, validation_data=test_dataset, shuffle=True, steps_per_epoch = steps_per_epoch, validation_steps=validation_steps)
+model.save("./debug2_resnet.h5")
+# save weights only
+model.save_weights('./weights2.h5')
+print("Saved as 'weights.h5'")
+
+
 
 #训练结果可视化
 accuracy = model_train.history["accuracy"]
