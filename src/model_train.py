@@ -8,7 +8,7 @@ learning_rate = 0.001
 training_step = 30000
 
 epochs = 10
-batch_size = 8
+batch_size = 16
 
 train_record_path = "./dataset/train.record"
 test_record_path = "./dataset/test.record"
@@ -48,11 +48,19 @@ train_dataset = train_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(
 test_dataset = test_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(3)
 
 # model = vgg16.vgg16()
-preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5"
-ResNet50 = tf.keras.applications.ResNet50(weights=preModel_path, include_top=False)
+preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
+ResNet18 = tf.keras.applications.ResNet50(weights=preModel_path, include_top=False)
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 fc = tf.keras.layers.Dense(2, activation="softmax") # 修改乘自己的类别数
-model = tf.keras.Sequential([ResNet50, global_average_layer, fc])
+model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
+
+# ResNet50.trainable =False
+# #模型搭建
+# model = tf.keras.Sequential()
+# model.add(ResNet50)
+# model.add(tf.keras.layers.GlobalAveragePooling2D())
+# model.add(tf.keras.layers.Dense(512,activation='relu'))
+# model.add(tf.keras.layers.Dense(1,activation='sigmoid'))
 
 
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),

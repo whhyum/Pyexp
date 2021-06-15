@@ -1,5 +1,5 @@
 import tensorflow as tf
-model_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5"
+model_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
 ResNet18 = tf.keras.applications.ResNet50(weights=model_path, include_top=False)
 print(ResNet18.summary())
 x = tf.random.normal([8,224,224,3])
