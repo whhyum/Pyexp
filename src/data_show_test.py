@@ -18,7 +18,7 @@ feature_description = {
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    image = tf.image.resize_with_crop_or_pad(image, 224, 224)
+    image = tf.image.resize_with_crop_or_pad(image, 64, 64)
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
@@ -30,7 +30,7 @@ dataset = dataset.repeat().shuffle(5000).batch(1).prefetch(1)
 
 for img, label in dataset.take(1):  # 只取前1条
     print(label.numpy())
-    print(img.numpy()[0].shape)
+    print(img.numpy()[0])
     plt.imshow(np.array(img.numpy()[0], np.uint8))
     plt.show()
 #     print (np.frombuffer(row['image/class'].numpy(), dtype=np.uint8)) # 如果要恢复成3d数组，可reshape

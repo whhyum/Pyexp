@@ -22,10 +22,6 @@ def build_model():
     global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
     fc = tf.keras.layers.Dense(2, activation="softmax")  # 修改乘自己的类别数
     model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
-    # model = tf.keras.Sequential()
-    # ...construct network here...
-    # model.add(...)
-
     # configure the model
     model.compile(optimizer=tf.keras.optimizers.Adam(),
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(),
