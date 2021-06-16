@@ -3,7 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 record_path = "./dataset/train.record"
-
+tf.enable_eager_execution(
+    config=None,
+    device_policy=None,
+    execution_mode=None
+)
 # 调用后我们会得到一个Dataset(tf.data.Dataset)，字面理解，这里面就存放着我们之前写入的所有Example。
 dataset = tf.data.TFRecordDataset(record_path)
 # 定义一个解析函数

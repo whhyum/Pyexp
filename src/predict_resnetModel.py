@@ -43,5 +43,7 @@ y = pretrained_model.predict(x)
 predict_cat = y[:, 0]
 predict_dog = y[:, 1]
 print("predict: ", y)
+y_test_pred = np.argmax(y, axis=1)
+print("模型判断所属类别：", y_test_pred)
 print("猫的概率: ", predict_cat * 100)
 print("狗的概率: ", predict_dog * 100)
