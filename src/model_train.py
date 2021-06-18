@@ -1,22 +1,25 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from keras import layers, optimizers, models
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+from keras.models import load_model
+from keras.models import Model
 
-learning_rate = 0.001
-training_step = 30000
+learning_rate = 0.0001
+# training_step = 30000
 
-epochs = 10
-batch_size = 8
+epochs = 200
+batch_size = 32
 
 train_record_path = "./dataset/train.record"
 test_record_path = "./dataset/test.record"
-# 调用后我们会得到一个Dataset(tf.data.Dataset)，字面理解，这里面就存放着我们之前写入的所有Example。
+# 调用后我们会得到一个Dataset(tf.data.Dataset),这里面就存放着写入的所有Example。
 train_dataset = tf.data.TFRecordDataset(train_record_path)
 test_dataset = tf.data.TFRecordDataset(test_record_path)
 
-steps_per_epoch = 15
+steps_per_epoch = 30
     # 25000/batch_size
 validation_steps = 10
     # 12500/batch_size
@@ -34,9 +37,9 @@ feature_description = {
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    shape1 = [64, 64]
+    shape1 = [128, 128]
     image = tf.image.resize(image, shape1)
-    image = tf.reshape(image, [64, 64, 3])
+    image = tf.reshape(image, [128, 128, 3])
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
@@ -49,12 +52,14 @@ test_dataset = test_dataset.map(parese_example)
 train_dataset = train_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(3)
 test_dataset = test_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(3)
 
+path = '../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
 # model = vgg16.vgg16()
-preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
-ResNet18 = tf.keras.applications.ResNet50(weights=preModel_path, include_top=False)
+# 预训练模型1
+# path = "../source/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5"
+ResNet = tf.keras.applications.ResNet50(weights= path, include_top=False)
 global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
 fc = tf.keras.layers.Dense(2, activation="softmax") # 修改乘自己的类别数
-model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
+model = tf.keras.Sequential([ResNet, global_average_layer, fc])
 
 # ResNet50.trainable =False
 # #模型搭建
@@ -64,20 +69,28 @@ model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
 # model.add(tf.keras.layers.Dense(512,activation='relu'))
 # model.add(tf.keras.layers.Dense(1,activation='sigmoid'))
 
+# 预训练模型2
+
+# conv_base  = tf.keras.applications.ResNet50(weights=path, include_top=False, input_shape=(150, 150, 3))
+#
+# model = models.Sequential()
+# model.add(conv_base)
+# model.add(layers.Flatten())
+# model.add(layers.Dense(2, activation='sigmoid'))
+#
+# conv_base.trainable = False
 
 model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
+              # loss='binary_crossentropy',
               # loss= 'mean_squared_error',
               metrics=["accuracy"])
 
 print(model.summary())
-model_train = model.fit_generator(train_dataset, epochs = epochs, validation_data=test_dataset, shuffle=True, steps_per_epoch = steps_per_epoch, validation_steps=validation_steps)
-model.save("./debug2_resnet.h5")
+model_train = model.fit(train_dataset, epochs = epochs, validation_data=test_dataset, shuffle=True, steps_per_epoch = steps_per_epoch, validation_steps=validation_steps)
+# model.save("./debug2_resnet.h5")
 # save weights only
-model.save_weights('./weights2.h5')
-print("Saved as 'weights.h5'")
-
-
+model.save_weights('./model/weights6.19.h5')
 
 #训练结果可视化
 accuracy = model_train.history["accuracy"]

@@ -4,7 +4,7 @@ import cv2
 cv2.__version__
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 #
 # from tensorflow.compat.v1 import ConfigProto
 # from tensorflow.compat.v1 import InteractiveSession
@@ -30,11 +30,11 @@ def build_model():
     return model
 
 pretrained_model = build_model()
-pretrained_model.load_weights('./weights.h5')
+pretrained_model.load_weights('./model/weights6.19.h5')
 
 # model_path = "./resnet.h5"
 # model = tf.keras.models.load_model(model_path)
-img = cv2.imread("../data/test/644.jpg")
+img = cv2.imread("../data/test/44.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 img = cv2.resize(img, (64, 64))
 img = np.array(img, np.float32)
@@ -45,5 +45,5 @@ predict_dog = y[:, 1]
 print("predict: ", y)
 y_test_pred = np.argmax(y, axis=1)
 print("模型判断所属类别：", y_test_pred)
-print("猫的概率: ", predict_cat * 100)
-print("狗的概率: ", predict_dog * 100)
+print("猫的概率: ", predict_cat * 100, '%')
+print("狗的概率: ", predict_dog * 100, '%')

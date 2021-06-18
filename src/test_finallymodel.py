@@ -1,22 +1,23 @@
-import cv2 as cv
 import tensorflow as tf
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 
-from keras.preprocessing.image import ImageDataGenerator
+from sklearn.metrics import classification_report,confusion_matrix
+# from sklearn.metrics import confusion_matrix
+
+# from keras.preprocessing.image import ImageDataGenerator
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
-tf.enable_eager_execution(
-    config=None,
-    device_policy=None,
-    execution_mode=None
-)
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# tf.enable_eager_execution(
+#     config=None,
+#     device_policy=None,
+#     execution_mode=None
+# )
 def build_model():
     # based on VGG-16
     preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
-    ResNet18 = tf.keras.applications.ResNet50(weights=preModel_path, include_top=False)
+    ResNet18 = tf.keras.applications.ResNet50(weights=None, include_top=False)
     global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
     fc = tf.keras.layers.Dense(2, activation="softmax")  # 修改乘自己的类别数
     model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
@@ -28,7 +29,7 @@ def build_model():
     return model
 
 model = build_model()
-model.load_weights('./weights.h5')
+model.load_weights('./model/weights6.19.h5')
 
 test_record_path = "./dataset/test.record"
 
@@ -40,11 +41,10 @@ feature_description = {
     'image/encoded': tf.io.FixedLenFeature([], tf.string)
 }
 
-
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    image = tf.image.resize(image, (64, 64))
+    image = tf.image.resize(image, (128, 128))
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
@@ -56,7 +56,7 @@ dataset = dataset.repeat().shuffle(5000).batch(1).prefetch(1)
 #
 y_true = []
 y_pred = []
-for img, label in dataset.take(100):  # 只取前1条
+for img, label in dataset.take(1000):  # 只取前1条
     # print(label.numpy())
     # print(img.numpy()[0].shape)
     y_true.append(label.numpy()[0])
@@ -67,14 +67,20 @@ for img, label in dataset.take(100):  # 只取前1条
     # y_pred = y_pred
     print('pred', y_pred)
     if(label.numpy()[0] != np.argmax(y, axis=1)[0]):
-        img = cv.cvtColor(img, cv.COLOR_BGR2RGB)
-        # image resize
-        image_resize = cv.resize(img, (128, 128))
-        cv.imwrite("./mis", image_resize)
+        predict_cat = y[:, 0]
+        predict_dog = y[:, 1]
+        print('猫的概率：',predict_cat)
+        print('狗的概率', predict_dog)
+        # plt.figure(1)
+        # plt.imshow(np.array(img.numpy()[0], np.uint8))
+        # plt.show()
+
 
 # dataset = ImageDataGenerator(rescale=1. / 255)
 cm=confusion_matrix(y_true,y_pred)
-print('混淆矩阵', cm)
+print('混淆矩阵: ')
+print( cm)
+print(classification_report(y_true,y_pred,target_names=['cat','dog']))
 
 def plot_confusion_matrix(cm, labels_name, title):
     np.set_printoptions(precision=2)

@@ -22,7 +22,7 @@ feature_description = {
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    image = tf.image.resize_with_crop_or_pad(image, 64, 64)
+    image = tf.image.resize_with_crop_or_pad(image, 128, 128)
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
