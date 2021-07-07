@@ -4,8 +4,9 @@ import random
 import sklearn.model_selection as ms
 from tqdm import tqdm
 
+# 将 txt文件转换为 record文件
+
 def int64_feature(value):
-    """Wrapper for inserting int64 features into Example proto."""
     if not isinstance(value, list):
         value = [value]
     return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
@@ -42,7 +43,7 @@ trainLib, testLib = ms.train_test_split(data_lib, test_size = 0.4)
 for line in tqdm(testLib):
     img_path = line.strip().split(" ")[0]
     label = int(line.strip().split(" ")[1])
-    # 生成tf.train.feature属性(key和value的键值对)，在将这些单独feature整合成features
+    # 生成tf.train.feature属性(key和 value的键值对)，在将这些单独feature整合成features
     # 生成Example并序列化
     example = imgLabel2example(img_path, label)
     # 将example序列化，压缩以减少size
@@ -61,4 +62,4 @@ for line in tqdm(trainLib):
     writerTrain.write(serialized_example)
 
 writerTrain.close()
-print("sess write")
+print("转换record文件成功！")

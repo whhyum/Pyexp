@@ -5,6 +5,7 @@ cv2.__version__
 
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 #
 # from tensorflow.compat.v1 import ConfigProto
 # from tensorflow.compat.v1 import InteractiveSession
@@ -15,10 +16,13 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # session = InteractiveSession(config=config)
 #
 
+
+# 模型预测图片查看分类效果
+
 def build_model():
     # based on VGG-16
-    preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
-    ResNet18 = tf.keras.applications.ResNet50(weights=preModel_path, include_top=False)
+    path = '../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+    ResNet18 = tf.keras.applications.ResNet50(weights=path, include_top=False)
     global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
     fc = tf.keras.layers.Dense(2, activation="softmax")  # 修改乘自己的类别数
     model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
@@ -45,5 +49,5 @@ predict_dog = y[:, 1]
 print("predict: ", y)
 y_test_pred = np.argmax(y, axis=1)
 print("模型判断所属类别：", y_test_pred)
-print("猫的概率: ", predict_cat * 100, '%')
-print("狗的概率: ", predict_dog * 100, '%')
+print("猫的概率: ", predict_cat[0] * 100, '%')
+print("狗的概率: ", predict_dog[0] * 100, '%')

@@ -2,16 +2,21 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 record_path = "./dataset/train.record"
+# 测试数据，将record文件进行重新展示，测试能否展示成功
+
+
 tf.enable_eager_execution(
     config=None,
     device_policy=None,
     execution_mode=None
 )
-# 调用后我们会得到一个Dataset(tf.data.Dataset)，字面理解，这里面就存放着我们之前写入的所有Example。
+# 得到一个 Dataset(tf.data.Dataset)
 dataset = tf.data.TFRecordDataset(record_path)
-# 定义一个解析函数
 
+
+# 定义一个解析函数
 feature_description = {
     'image/filename': tf.io.FixedLenFeature([], tf.string),
     'image/class': tf.io.FixedLenFeature([], tf.int64),
@@ -20,6 +25,11 @@ feature_description = {
 
 
 def parese_example(serialized_example):
+    """
+    测试图片重新转换 => 解码
+    :param serialized_example:
+    :return:
+    """
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
     image = tf.image.resize_with_crop_or_pad(image, 128, 128)
@@ -32,9 +42,9 @@ def parese_example(serialized_example):
 dataset = dataset.map(parese_example)
 dataset = dataset.repeat().shuffle(5000).batch(1).prefetch(1)
 
-for img, label in dataset.take(1):  # 只取前1条
+for img, label in dataset.take(1):  # 只取前 1 条 测试
     print(label.numpy())
     print(img.numpy()[0])
     plt.imshow(np.array(img.numpy()[0], np.uint8))
     plt.show()
-#     print (np.frombuffer(row['image/class'].numpy(), dtype=np.uint8)) # 如果要恢复成3d数组，可reshape
+#     print (np.frombuffer(row['image/class'].numpy(), dtype=np.uint8))

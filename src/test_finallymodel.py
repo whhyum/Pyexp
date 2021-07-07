@@ -14,10 +14,16 @@ import os
 #     device_policy=None,
 #     execution_mode=None
 # )
+
+# 测试模型最终效果
+
 def build_model():
-    # based on VGG-16
-    preModel_path = "../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop (1).h5"
-    ResNet18 = tf.keras.applications.ResNet50(weights=None, include_top=False)
+    """
+    使用weight重新加载模型
+    :return:
+    """
+    path = '../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
+    ResNet18 = tf.keras.applications.ResNet50(weights=path, include_top=False)
     global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
     fc = tf.keras.layers.Dense(2, activation="softmax")  # 修改乘自己的类别数
     model = tf.keras.Sequential([ResNet18, global_average_layer, fc])
@@ -44,7 +50,7 @@ feature_description = {
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    image = tf.image.resize(image, (128, 128))
+    image = tf.image.resize(image, (224, 224))
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
@@ -56,7 +62,7 @@ dataset = dataset.repeat().shuffle(5000).batch(1).prefetch(1)
 #
 y_true = []
 y_pred = []
-for img, label in dataset.take(1000):  # 只取前1条
+for img, label in dataset.take(1000):
     # print(label.numpy())
     # print(img.numpy()[0].shape)
     y_true.append(label.numpy()[0])

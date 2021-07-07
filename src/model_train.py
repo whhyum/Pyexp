@@ -2,6 +2,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from keras import layers, optimizers, models
+from tensorflow import keras
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from keras.models import load_model
@@ -10,19 +11,22 @@ from keras.models import Model
 learning_rate = 0.0001
 # training_step = 30000
 
-epochs = 200
+epochs = 100
 batch_size = 32
 
 train_record_path = "./dataset/train.record"
 test_record_path = "./dataset/test.record"
-# 调用后我们会得到一个Dataset(tf.data.Dataset),这里面就存放着写入的所有Example。
+# 读取record文件
+
 train_dataset = tf.data.TFRecordDataset(train_record_path)
 test_dataset = tf.data.TFRecordDataset(test_record_path)
+# 得到dataset数据
 
 steps_per_epoch = 30
     # 25000/batch_size
 validation_steps = 10
     # 12500/batch_size
+#    定义学习过程
 
 
 # 定义一个解析函数
@@ -37,9 +41,9 @@ feature_description = {
 def parese_example(serialized_example):
     feature_dict = tf.io.parse_single_example(serialized_example, feature_description)
     image = tf.io.decode_jpeg(feature_dict['image/encoded'])  # 解码JPEG图片
-    shape1 = [128, 128]
+    shape1 = [224, 224]
     image = tf.image.resize(image, shape1)
-    image = tf.reshape(image, [128, 128, 3])
+    image = tf.reshape(image, [224, 224, 3])
     image = tf.cast(image, tf.float32)
 
     feature_dict['image'] = image
@@ -53,12 +57,13 @@ train_dataset = train_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(
 test_dataset = test_dataset.repeat().shuffle(2000).batch(batch_size).prefetch(3)
 
 path = '../source/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5'
-# model = vgg16.vgg16()
+# 读取预训练模型
 # 预训练模型1
 # path = "../source/inception_resnet_v2_weights_tf_dim_ordering_tf_kernels_notop.h5"
 ResNet = tf.keras.applications.ResNet50(weights= path, include_top=False)
-global_average_layer = tf.keras.layers.GlobalAveragePooling2D()
-fc = tf.keras.layers.Dense(2, activation="softmax") # 修改乘自己的类别数
+# 使用预训练模型
+global_average_layer = tf.keras.layers.GlobalAveragePooling2D()  # 降维
+fc = tf.keras.layers.Dense(2, activation="softmax")  # 全连接层，softmax 激活函数
 model = tf.keras.Sequential([ResNet, global_average_layer, fc])
 
 # ResNet50.trainable =False
@@ -87,10 +92,24 @@ model.compile(optimizer=tf.keras.optimizers.Adam(lr=learning_rate),
               metrics=["accuracy"])
 
 print(model.summary())
-model_train = model.fit(train_dataset, epochs = epochs, validation_data=test_dataset, shuffle=True, steps_per_epoch = steps_per_epoch, validation_steps=validation_steps)
+
+# 使用 tensorBoard
+log_dir="./logs"
+if not os.path.exists(log_dir):
+    os.mkdir(log_dir)    # 创建保存目录
+
+tensorboard_callback = keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1,
+                    profile_batch = 100000000)
+model_train = model.fit(train_dataset,
+                        epochs = epochs,
+                        validation_data=test_dataset,
+                        shuffle=True,
+                        steps_per_epoch = steps_per_epoch,
+                        validation_steps=validation_steps,
+                        callbacks=[tensorboard_callback])
 # model.save("./debug2_resnet.h5")
 # save weights only
-model.save_weights('./model/weights6.19.h5')
+model.save_weights('./model/weights7.6.h5')
 
 #训练结果可视化
 accuracy = model_train.history["accuracy"]
